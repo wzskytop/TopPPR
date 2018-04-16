@@ -1,6 +1,6 @@
 # TopPPR
 ## 准备工作
-将准备好的数据[file].txt放入dataset文件夹内，并在ppr-answer文件夹下创建同名的子文件夹[file]
+将准备好的数据[file].txt放入dataset文件夹内，并在ppr-answer文件夹下创建同名的子文件夹[file]。注意数据第一行是总结点数，之后每一行是每条边的信息
 ## 编译
 执行compile.sh即可
 ## TopPPR查询步骤
