@@ -209,7 +209,7 @@ int main(int argc, char *argv[]){
                 }
                 double real_eps = eps * 80 * sqrt(1/ (double) ppr.g.m / (double) ppr.g.n / log(ppr.g.n)) / (double) log(k);
                 //TopPPR算法
-                double* resultList = ppr.TopPPR(test_node, real_eps, k, outputData, outputData2);     
+                double* resultList = ppr.TopPPR(test_node, real_eps, k);     
             }
             cout << "avg precision: " << ppr.avg_pre / (double) node_count << endl;
             cout << "avg time: " << ppr.avg_time / (double) node_count << endl;
