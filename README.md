@@ -71,7 +71,7 @@ $ sh gen_groundtruth.sh
 -Example:
 
 ```sh
-./TopPPR -d test -algo TopPPR -r 1 -n 50 -err 0 -k 5
+./TopPPR -d test -algo TopPPR -r 1 -n 50 -k 5
 ```
 
 ## Approximate Query
@@ -79,5 +79,5 @@ $ sh gen_groundtruth.sh
 -Example:
 
 ```sh
-./TopPPR -d test -algo TopPPR -r 0.4 -n 50 -err 0 -k 5
+./TopPPR -d test -algo TopPPR -r 0.4 -n 50 -k 5
 ```
