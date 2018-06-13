@@ -73,14 +73,12 @@ int main(int argc, char *argv[]){
     int i = 1;
     char *endptr;
     string filename;
-    double eps;                    //forward adaptive parameter
+    double eps = 0.05;                    //forward adaptive parameter
     int k = 500;                   //parameter k
     double alpha = 0.2;            //decay factor
     int node_count = 20;           //query node size
     double error_rate = 1;         //precision parameter
     double error_eps = 0;          //min error
-    double bound_c = 0.5;          //backward search shrink parameter
-    double forward_c = 1;          //forward search shrink parameter
     string algo = "TopPPR";
     if(argc < 7){
         usage();
@@ -94,14 +92,6 @@ int main(int argc, char *argv[]){
         else if (!strcmp(argv[i], "-algo")) {
             i = check_inc(i, argc);
             algo = argv[i];
-        }
-        else if (!strcmp(argv[i], "-e")) {
-            i = check_inc(i, argc);
-            eps = strtod(argv[i], &endptr);
-            if ((eps == 0 || eps > 1) && endptr) {
-                cerr << "Invalid eps argument" << endl;
-                exit(1);
-            }
         }
         else if (!strcmp(argv[i], "-k")) {
             i = check_inc(i, argc);
@@ -135,22 +125,6 @@ int main(int argc, char *argv[]){
                 exit(1);
             }
         }
-        else if (!strcmp(argv[i], "-c")) {
-            i = check_inc(i, argc);
-            bound_c = strtod(argv[i], &endptr);
-            if ((bound_c < 0) && endptr) {
-                cerr << "Invalid bound_c argument" << endl;
-                exit(1);
-            }
-        }
-        else if (!strcmp(argv[i], "-fc")) {
-            i = check_inc(i, argc);
-            forward_c = strtod(argv[i], &endptr);
-            if (((forward_c < 0) || (forward_c > 1)) && endptr) {
-                cerr << "Invalid forward_c argument" << endl;
-                exit(1);
-            }
-        }
         else if (!strcmp(argv[i], "-a")) {
             i = check_inc(i, argc);
             alpha = strtod(argv[i], &endptr);
@@ -166,7 +140,7 @@ int main(int argc, char *argv[]){
         i++;
     }
     
-    PPR ppr = PPR(filename, error_rate, error_eps, bound_c, forward_c, k, alpha);
+    PPR ppr = PPR(filename, error_rate, error_eps, k, alpha);
     if(algo == "GEN_QUERY"){
         ofstream outFile("dataset/" + filename + ".query");
         ppr.generateQueryNode(node_count, outFile);
@@ -176,6 +150,8 @@ int main(int argc, char *argv[]){
         ppr.PowerMethodMulti(100, node_count, 10);/*  多线程PowerMethparameter: iteration loops, node size, thread num */
     }
     else{
+        if(error_rate != 1)
+            eps = 0.5;
         ifstream nodes_file("dataset/" + filename + ".query");
         vector<int> test_nodes;
         while(!nodes_file.eof()){
@@ -207,7 +183,7 @@ int main(int argc, char *argv[]){
                     cout << "gap too small!" << endl;
                     continue;
                 }
-                double real_eps = eps * 80 * sqrt(1/ (double) ppr.g.m / (double) ppr.g.n / log(ppr.g.n)) / (double) log(k);
+                double real_eps = eps * 800 * sqrt(1/ (double) ppr.g.m / (double) ppr.g.n / log(ppr.g.n)) / (double) log(k);
                 //TopPPR算法
                 double* resultList = ppr.TopPPR(test_node, real_eps, k);     
             }

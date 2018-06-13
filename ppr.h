@@ -105,12 +105,18 @@ public:
     //const static int NUMTHREAD = 20;
     Random* Rs;
 
-    PPR(string name, double e_rate, double e_eps, double bound_para_c, double forward_para_c, int k_num, double input_alpha) {
+    PPR(string name, double e_rate, double e_eps, int k_num, double input_alpha) {
         k = k_num;
         error_rate = e_rate;
         error_eps = e_eps;
-        bound_c = bound_para_c;
-        forward_c = forward_para_c;
+        if(error_rate != 1){
+            bound_c = 0.2;
+            forward_c = 0.2;
+        }
+        else{
+            bound_c = 0.5;
+            forward_c = 1;
+        }
         error_num = k * (1-error_rate);
         avg_L1_error = 0;
         avg_max_error = 0;
@@ -330,7 +336,6 @@ public:
 
     //TopPPR算法 dead node return to s, adaptive forward + random + back
     double* TopPPR(int s, double r_threshold, int k){
-        r_threshold *= 10;
         cout << "node: " << s << endl;
         vector<int> deadNodeList;
         for(int i = 0; i < vert; i++){
