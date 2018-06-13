@@ -10,7 +10,7 @@
 
 
 void usage() {
-    cerr << "AdaptivePPR [-d <dataset>] [-e epsilon] [-w walknum] [-k topk (default 500)] [-n node_count (default 20)] [-r error_rate (default 1)] [-err error_eps (default 0)] [-c bound_err (default 0.5)]" << endl;
+    cerr << "AdaptivePPR [-d <dataset>] [-k topk (default 500)] [-n node_count (default 20)] [-r error_rate (default 1)] [-err error_eps (default 0)]" << endl;
 }
 
 int check_inc(int i, int max) {
@@ -78,7 +78,7 @@ int main(int argc, char *argv[]){
     double alpha = 0.2;            //decay factor
     int node_count = 20;           //query node size
     double error_rate = 1;         //precision parameter
-    double error_eps = 0;          //min error
+    double error_eps = 0.0000000001;          //min error
     string algo = "TopPPR";
     if(argc < 7){
         usage();
