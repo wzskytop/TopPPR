@@ -5,16 +5,18 @@ If you have any questions, feel free to contact me. My emails are: 2011202413@ru
 Please cite our paper if you choose to use our code. 
 
 ```
-@inproceedings{
-  author    = {Zhewei Wei and
-               Xiaodong He and
-               Xiaokui Xiao and
-               Sibo Wang and
-               Shuo Shang and
-               Ji-Rong Wen},
-  title     = {TopPPR: Top-k Personalized PageRank Queries with Precision Guarantees on Large Graphs},
-  booktitle = {{SIGMOD} 2018},
-  year      = {2018},
+@inproceedings{wei2018topppr,
+  title        = {Topppr: top-k personalized pagerank queries with precision guarantees on large graphs},
+  author       = {Wei, Zhewei and
+                  He, Xiaodong and
+                  Xiao, Xiaokui and
+                  Wang, Sibo and
+                  Shang, Shuo and
+                  Wen, Ji-Rong},
+  booktitle    = {Proceedings of the 2018 International Conference on Management of Data},
+  pages        = {441--456},
+  year         = {2018},
+  organization = {ACM}
 }
 ```
 

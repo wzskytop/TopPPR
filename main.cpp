@@ -183,7 +183,7 @@ int main(int argc, char *argv[]){
                     cout << "gap too small!" << endl;
                     continue;
                 }
-                double real_eps = eps * 800 * sqrt(1/ (double) ppr.g.m / (double) ppr.g.n / log(ppr.g.n)) / (double) log(k);
+                double real_eps = eps * 800 * sqrt(1/ (double) ppr.g.m / (double) ppr.g.n / log(ppr.g.n)) / (double) log(k) / max(0.0001, pow(error_rate, 3));
                 //TopPPR算法
                 double* resultList = ppr.TopPPR(test_node, real_eps, k);     
             }
