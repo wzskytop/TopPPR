@@ -194,6 +194,12 @@ public:
         delete[] r_max_c;
     }
 
+    bool is_file_exist(string fileName)
+    {
+        ifstream infile(fileName);
+        return infile.good();
+    }
+
     //取s点的groundtruth
     vector<int> getRealTopK(int s, int k){
         stringstream ss;
@@ -413,8 +419,8 @@ public:
                 double resume_residula = tempR * (1-alpha);
                 r_res -= alpha * tempR;
                 if(tempOutSize == 0){
-                	if(r0[s] == 0 && resume_residula / (double) g.getOutSize(s) <= r_threshold && !isInQueueBack[s]){
-                		restR[restRCount++] = s;
+                    if(r0[s] == 0 && resume_residula / (double) g.getOutSize(s) <= r_threshold && !isInQueueBack[s]){
+                        restR[restRCount++] = s;
                         isInQueueBack[s] = true;
                     }
                     r0[s] += resume_residula;
@@ -427,7 +433,7 @@ public:
                     for(int i = 0; i < tempOutSize; i++){
                         int newNode = g.getOutVert(tempNode, i);
                         if(r0[newNode] == 0 && resume_residula / (double) tempOutSize / (double) g.getOutSize(newNode) <= r_threshold && !isInQueueBack[newNode]){
-                        	restR[restRCount++] = newNode;
+                            restR[restRCount++] = newNode;
                             isInQueueBack[newNode] = true;
                         }
                         r0[newNode] += resume_residula / (double) tempOutSize; 
@@ -446,11 +452,11 @@ public:
             r_sum = 0;
             cout << restRCount << endl;
             for(int i = 0; i < restRCount; i++){
-            	int tempNode = restR[i];
+                int tempNode = restR[i];
                 isInQueueBack[tempNode] = false;
-            	if(r0[tempNode] > 0){
-            		r_sum += r0[tempNode];
-            		aliasP.push_back(pair<int, double>(tempNode, r0[tempNode]));
+                if(r0[tempNode] > 0){
+                    r_sum += r0[tempNode];
+                    aliasP.push_back(pair<int, double>(tempNode, r0[tempNode]));
                 }
             }
             cout << "rsum: " << r_sum << ", " << r_res << endl;
@@ -468,9 +474,9 @@ public:
                     value_verts[value_count++] = tempNode;       
                 }
                 vert_count[tempNode]++;
-        		if(resultList[tempNode] == 0){
-        		    forwardCandidate[fora_candidate++] = tempNode;	
-        		}
+                if(resultList[tempNode] == 0){
+                    forwardCandidate[fora_candidate++] = tempNode;  
+                }
                 resultList[tempNode] += increment;
                 while(R.drand() > alpha){
                     int length = g.getOutSize(tempNode);
@@ -484,9 +490,9 @@ public:
                     if(vert_count[tempNode] == 0){
                         value_verts[value_count++] = tempNode;       
                     }
-        		    if(resultList[tempNode] == 0){
-        			    forwardCandidate[fora_candidate++] = tempNode;	
-        		    }
+                    if(resultList[tempNode] == 0){
+                        forwardCandidate[fora_candidate++] = tempNode;  
+                    }
                     resultList[tempNode] += increment;
                     vert_count[tempNode]++;
                 }
@@ -503,10 +509,10 @@ public:
             pq lower_pq(pqcompare(true));
 
             double temp_upper_min = 0, temp_lower_min = 0;
-    	    for(int i = 0; i < fora_candidate; i++){ 
-    	        int tempNode = forwardCandidate[i];
-        		betas[tempNode] = gap1 * sqrt(multiCoff * (resultList[tempNode] - pi[tempNode])) + gap2;
-        		double tempUpperBound = resultList[tempNode] + betas[tempNode];
+            for(int i = 0; i < fora_candidate; i++){ 
+                int tempNode = forwardCandidate[i];
+                betas[tempNode] = gap1 * sqrt(multiCoff * (resultList[tempNode] - pi[tempNode])) + gap2;
+                double tempUpperBound = resultList[tempNode] + betas[tempNode];
                 double tempLowerBound = resultList[tempNode] - betas[tempNode];
                 if(i < k){
                     lower_pq.push(pair<int, double>(tempNode, tempLowerBound));
@@ -539,15 +545,15 @@ public:
                         upper_pq.push(pair<int, double>(tempNode, tempUpperBound));   
                         temp_upper_min = upper_pq.top().second;
                     }
-                }	    
-	        }
+                }       
+            }
             upperBound = upper_pq.top().second;
             lowerBound = lower_pq.top().second;          
             int leftCandidateSize = 0;
 
-    	    for(int i = 0; i < fora_candidate; i++){
-        		int tempNode = forwardCandidate[i];
-        		double lowBound = resultList[tempNode] - betas[tempNode];
+            for(int i = 0; i < fora_candidate; i++){
+                int tempNode = forwardCandidate[i];
+                double lowBound = resultList[tempNode] - betas[tempNode];
                 double upBound = resultList[tempNode] + betas[tempNode];
                 if(lowBound > upperBound){
                     leftCandidateSize++;
@@ -555,7 +561,7 @@ public:
                 else if(lowBound <= upperBound && upBound >= lowerBound){
                     candidate_size++;
                 }
-    	    }
+            }
             clock_t t3 = clock();
             total_t1 += ta - t0;
             total_t2 += t1 - ta;
@@ -587,7 +593,7 @@ public:
                 cout << "left size: " << candidate_left.size() << endl;
                 
                 clock_t t5 = clock();
-		cout << "fora precision: " << calPrecision(candidate_left, realList, candidate_left.size()) << endl;
+        cout << "fora precision: " << calPrecision(candidate_left, realList, candidate_left.size()) << endl;
                 vector<pair<int, double> > backResult;
                 struct timeval t_start,t_end;
                 gettimeofday(&t_start, NULL); 
@@ -654,7 +660,7 @@ public:
                 double totalTime = (total_t1 + total_t2 + total_t3 + total_t4 + t4 - t3_1) / (double) CLOCKS_PER_SEC + cost_time / (double) 1000; 
                 cout << "total time: " << totalTime << endl;
                 avg_pre += lastPrecision;
-		        avg_time += totalTime;
+                avg_time += totalTime;
                 break;
             }
             r_threshold *= 0.5;
@@ -804,7 +810,7 @@ public:
         time1 = 0;
 
         unordered_map<int, double> candidate_r_max;
-	unordered_map<int, double> candidate_edge;
+    unordered_map<int, double> candidate_edge;
         while(tempK > error_num && candidate_nodes.size() - tempK > error_num && r_threshold > 0.000001){
             cout << "epoch: " << r_threshold << endl;
             clock_t t0 = clock();
@@ -815,7 +821,7 @@ public:
                 r_hash_count = 0;
                 int t = candidate_nodes[ind];
                 candidate_r_max[t] = 0;
-		candidate_edge[t] = 0;
+        candidate_edge[t] = 0;
                 rmap_back[t] = 1;
                 r_item_arr[t] = true;
                 r_hash_arr[r_hash_count++] = t;
@@ -844,7 +850,7 @@ public:
                     rmap_back[tempNode] = 0;
                     answer_sim2[t] += r0_map[tempNode] * (alpha * tempR);                        
                     if(tempNode == s){
-			candidate_edge[t] += deadNodeList.size();
+            candidate_edge[t] += deadNodeList.size();
                         for(int i = 0; i < deadNodeList.size(); i++){
                             int newNode = deadNodeList[i];
                             rmap_back[newNode] += (1-alpha) * tempR;
@@ -861,7 +867,7 @@ public:
                             }
                         }
                     }
-		    candidate_edge[t] += g.getInSize(tempNode);    
+            candidate_edge[t] += g.getInSize(tempNode);    
                     for(int i = 0; i < g.getInSize(tempNode); i++){
                         int newNode = g.getInVert(tempNode, i);
                         rmap_back[newNode] += (1-alpha) * tempR / (double) g.getOutSize(newNode);
@@ -1042,19 +1048,19 @@ public:
     //计算Precision
     double calPrecision(vector<int> topK1, vector<int> realList, int k, bool isShowMissing = false){
         int size = realList.size();
-	   int size2 = topK1.size();
+       int size2 = topK1.size();
         int hitCount = 0;
         for(int i = 0; i < size2; i++){
-	       bool isFind = false;
+           bool isFind = false;
             for(int j = 0; j < size; j++){
                 if(topK1[i] == realList[j]){
                     hitCount++;
-		            isFind = true;
+                    isFind = true;
                     break;
                 }
             }
             /*if(!isFind){
-	           cout << "useless node: " << topK1[i] << endl;
+               cout << "useless node: " << topK1[i] << endl;
             }*/
         }
         double result = hitCount / (double) k;
@@ -1070,7 +1076,7 @@ public:
             string outputFile = ss.str();
             cout << "file: " << outputFile << endl;
             PowerMethodK(iterations, outputFile, tempNode, 500);
-	    cout << outputFile << "done!"  << endl;        
+        cout << outputFile << "done!"  << endl;        
         }
     }
 
@@ -1127,7 +1133,7 @@ public:
         delete[] map_ppr;
     }
 
-	
+    
 /*void PowerMethodK2(int iterations, string outputFile, int u, int k){
     double* scores = new double[vert];
     double* nextScores = new double[vert];
@@ -1152,12 +1158,12 @@ public:
                 nextScores[j] += (1-alpha) * scores[tempNode] / (double) g.getOutSize(tempNode);
             }
         }
-	bool isBreak = true;
+    bool isBreak = true;
         for(int j = 0; j < vert; j++){
             if(fabs(scores[j] - nextScores[j]) > 0.0000000001)
                 isBreak = false;
             scores[j] = nextScores[j];
-	}
+    }
         if(isBreak){
             cout << "break! " << endl;
             break;
@@ -1213,7 +1219,7 @@ public:
             int tempNode = R.generateRandom() % vert;
             if(g.getOutSize(tempNode) == 0){
                 i--;
-                continue;	
+                continue;   
             }
             fout << tempNode << endl;
         }

@@ -147,9 +147,19 @@ int main(int argc, char *argv[]){
         outFile.close(); 
     }
     else if(algo == "GEN_GROUND_TRUTH"){
-        ppr.PowerMethodMulti(100, node_count, 10);/*  多线程PowerMethparameter: iteration loops, node size, thread num */
+        string queryname = "dataset/" + filename + ".query";
+        if(!ppr.is_file_exist(queryname)){
+            cout << "please generate query file first" << endl;
+        }
+        else
+            ppr.PowerMethodMulti(100, node_count, 10);/*  多线程PowerMethparameter: iteration loops, node size, thread num */
     }
     else{
+        string queryname = "dataset/" + filename + ".query";
+        if(!ppr.is_file_exist(queryname)){
+            cout << "please generate query file first" << endl;
+            return 0;
+        }
         if(error_rate != 1)
             eps = 0.5;
         ifstream nodes_file("dataset/" + filename + ".query");
@@ -165,21 +175,37 @@ int main(int argc, char *argv[]){
                 break;
             }
             int realCount = 0;
+            int totalQuery = test_nodes.size();
             for(int t = 0; t < node_count; t++){
+                if(realCount == totalQuery){
+                    cout << "too many query node than query file" << endl;
+                    return 0;
+                }
                 int test_node = test_nodes[realCount++];
                 cout << "node: " << test_node << " " << eps << " " << k << endl;
+                stringstream ss;
+                ss << "ppr-answer/" << filename << "/" << test_node << ".txt";
+                string infile = ss.str();
+                if(!ppr.is_file_exist(infile)){
+                    cout << "node:" << test_node << " groundtruth file not found, please generate groundtruth first" << endl;
+                    return 0;
+                }
                 vector<int> realList = ppr.getRealTopK(test_node, k+1);
                 unordered_map<int, double> realMap = ppr.getRealTopKMap(test_node, k+1);
                 if(ppr.g.getOutSize(test_node) == 0){
                     t--;
+                    node_count--;
                     continue;
                 }
                 if(realMap[realList[k - 1]] < 0.0000000001){
                     t--;
+                    node_count--;
+                    cout << "Top K value is too small" << endl;
                     continue;
                 }
                 if(realMap[realList[k - 1]] > 0.0000000001 && realMap[realList[k - 1]] - realMap[realList[k]] < 0.0000000001){
                     t--;
+                    node_count--;
                     cout << "gap too small!" << endl;
                     continue;
                 }
