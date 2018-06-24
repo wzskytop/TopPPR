@@ -1248,7 +1248,9 @@ void PPR::PowerMethodMulti(int iterations, int node_count, int num_thread){
         nodes.push_back(temp_node);
     }
     node_file.close();
-
+    if(node_count < num_thread){
+        num_thread = node_count;
+    }
     vector<thread> threads;
     for(int i = 0; i < num_thread-1; i++){
         vector<int> t_nodes;
