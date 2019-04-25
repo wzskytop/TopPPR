@@ -53,8 +53,8 @@ public:
 		}
 		int fromNode, toNode;
         int edgeCount = 0;
-        while(infile.good()){
-        	infile >> fromNode >> toNode;
+        while(infile >> fromNode >> toNode){
+        	//infile >> fromNode >> toNode;
         	outdegree[fromNode]++;
         	indegree[toNode]++;
         }
@@ -89,8 +89,8 @@ public:
         clock_t t0 = clock();
         infile >> n;
         cout << "n=: " << n << endl;
-        while(infile.good()){
-        	infile >> fromNode >> toNode;
+        while(infile >> fromNode >> toNode){
+        	//infile >> fromNode >> toNode;
         	outAdjList[fromNode][pointer_out[fromNode]++] = toNode;
         	inAdjList[toNode][pointer_in[toNode]++] = fromNode;
         	m++;

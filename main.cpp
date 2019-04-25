@@ -170,7 +170,10 @@ int main(int argc, char *argv[]){
             test_nodes.push_back(temp_node);
         }
         cout << "read done!" << endl;
+        // int kkk[11] = {1,2,4,8,16,32,64,128,256,512,1024};
         for(int para = 0; para < 1; para++){
+            //k = kkk[para];
+            //cout<<"k="<<k<<endl;
             if(k > ppr.g.n){
                 break;
             }
@@ -182,7 +185,7 @@ int main(int argc, char *argv[]){
                     return 0;
                 }
                 int test_node = test_nodes[realCount++];
-                cout << "node: " << test_node << " " << eps << " " << k << endl;
+                //cout << "node: " << test_node << " " << eps << " " << k << endl;
                 stringstream ss;
                 ss << "ppr-answer/" << filename << "/" << test_node << ".txt";
                 string infile = ss.str();
@@ -211,7 +214,7 @@ int main(int argc, char *argv[]){
                 }
                 double real_eps = eps * 800 * sqrt(1/ (double) ppr.g.m / (double) ppr.g.n / log(ppr.g.n)) / (double) log(k) / max(0.0001, pow(error_rate, 3));
                 //TopPPR算法
-                double* resultList = ppr.TopPPR(test_node, real_eps, k);     
+                vector<pair<int, double> > topkppr = ppr.TopPPR(test_node, real_eps, k);     
             }
             cout << "avg precision: " << ppr.avg_pre / (double) node_count << endl;
             cout << "avg time: " << ppr.avg_time / (double) node_count << endl;

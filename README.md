@@ -70,7 +70,7 @@ $ sh gen_groundtruth.sh
 
 ## Exact Query
 
--Example:
+- Example:
 
 ```sh
 ./TopPPR -d test -algo TopPPR -r 1 -n 50 -k 5
@@ -78,7 +78,7 @@ $ sh gen_groundtruth.sh
 
 ## Approximate Query
 
--Example:
+- Example:
 
 ```sh
 ./TopPPR -d test -algo TopPPR -r 0.4 -n 50 -k 5

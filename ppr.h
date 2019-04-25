@@ -114,7 +114,8 @@ public:
             forward_c = 0.2;
         }
         else{
-            bound_c = 0.5;
+            bound_c = 1.7;
+            //bound_c = 0.5;
             forward_c = 1;
         }
         error_num = k * (1-error_rate);
@@ -341,13 +342,15 @@ public:
     }
 
     //TopPPR算法 dead node return to s, adaptive forward + random + back
-    double* TopPPR(int s, double r_threshold, int k){
+    vector<pair<int, double> > TopPPR(int s, double r_threshold, int k){
         cout << "node: " << s << endl;
         vector<int> deadNodeList;
+        vector<pair<int, double> > topkppr;
         for(int i = 0; i < vert; i++){
             if(g.getOutSize(i) == 0){
                 deadNodeList.push_back(i);
             }
+            resultList[i] = 0;
         }
         vector<int> realList = getRealTopK(s, k);
         int* forwardCandidate = new int[vert];
@@ -363,13 +366,14 @@ public:
         queue<int> r_queue;
         if(g.getOutSize(s) == 0){
             resultList[s] = 1;
+            topkppr.push_back(pair<int , double>(s,1));
             delete[] pi;
             delete[] r0;
             delete[] betas;
             delete[] isInQueue;        
             delete[] forwardCandidate;
             delete[] restR;
-            return resultList;
+            return topkppr;
         }
         
         double total_t1 = 0, total_t2 = 0, total_t3 = 0, total_t4 = 0;
@@ -450,7 +454,7 @@ public:
             }
             vector<pair<int, double> > aliasP;
             r_sum = 0;
-            cout << restRCount << endl;
+            //cout << restRCount << endl;
             for(int i = 0; i < restRCount; i++){
                 int tempNode = restR[i];
                 isInQueueBack[tempNode] = false;
@@ -459,12 +463,12 @@ public:
                     aliasP.push_back(pair<int, double>(tempNode, r0[tempNode]));
                 }
             }
-            cout << "rsum: " << r_sum << ", " << r_res << endl;
+            //cout << "rsum: " << r_sum << ", " << r_res << endl;
 
             Alias alias = Alias(aliasP);
             clock_t ta = clock();
             walk_num = max(1000, (int) ((ta - t0) / (double) CLOCKS_PER_SEC * 400000));
-            cout << "walk num: " << walk_num << endl;
+            //cout << "walk num: " << walk_num << endl;
             double increment = r_sum * alpha / (double) walk_num;        
             double temp_count = 0;
             value_count = 0;
@@ -590,27 +594,27 @@ public:
                 for(int i =0 ; i < leftVec.size(); i++){
                     candidate_left.push_back(leftVec[i].first);
                 }
-                cout << "left size: " << candidate_left.size() << endl;
+                //cout << "left size: " << candidate_left.size() << endl;
                 
                 clock_t t5 = clock();
-        cout << "fora precision: " << calPrecision(candidate_left, realList, candidate_left.size()) << endl;
+                //cout << "fora precision: " << calPrecision(candidate_left, realList, candidate_left.size()) << endl;
                 vector<pair<int, double> > backResult;
                 struct timeval t_start,t_end;
                 gettimeofday(&t_start, NULL); 
                 long start = ((long)t_start.tv_sec)*1000+(long)t_start.tv_usec/1000; 
-                int newK = k - leftVec.size();  
+                int newK = k - (int)leftVec.size();  
                 double time_back = 0;
-                cout << "newK: " << newK << ", middle size: " << middleVec.size() << "error_num: " << error_num << endl;   
+                //cout << "newK: " << newK << ", middle size: " << middleVec.size() << "error_num: " << error_num << endl;   
                 if(fora_candidate < min(k, 500)){
                     for(int i = 0; i < middleVec.size(); i++){
                         leftVec.push_back(middleVec[i]);
                     }
-                    for(int i = 0; i < newK - middleVec.size(); i++){
+                    for(int i = 0; i < newK - (int)middleVec.size(); i++){
                         leftVec.push_back(pair<int, double>(i, 0));
                     }
                 }
-                else if(newK > error_num && (middleVec.size() - newK) >  error_num) {
-                    cout << "candidate size: " << middleVec.size() << endl;
+                else if(newK > error_num && ((int)middleVec.size() - newK) >  error_num) {
+                    //cout << "candidate size: " << middleVec.size() << endl;
                     vector<int> candidate_nodes;
                     for(int i = 0; i < middleVec.size(); i++){
                         candidate_nodes.push_back(middleVec[i].first);
@@ -621,14 +625,14 @@ public:
                     }
                 }
                 else if(newK > 0){
-                    cout << "sort middle" << endl;
+                    //cout << "sort middle" << endl;
                     vector<pair<int, double> > targetKVec = getTopK(middleVec, newK);
                     for(int i = 0; i < newK; i++){
                         leftVec.push_back(targetKVec[i]);
                     }
                 }
                 else{
-                    cout << "enough back" << endl;
+                    //cout << "enough back" << endl;
                 }
                 gettimeofday(&t_end, NULL); 
                 long end = ((long)t_end.tv_sec)*1000+(long)t_end.tv_usec/1000; 
@@ -642,23 +646,24 @@ public:
                         breakId = i;
                     }
                 }
-                cout << breakId << endl;
+                //cout << breakId << endl;
                 vector<int> newLeftVec;
                 for(int i = 0; i < breakId; i++){
                     newLeftVec.push_back(leftVec[i].first);
+                    topkppr.push_back(leftVec[i]);
                 }
                 leftVec.clear();
                 double lastPrecision = calPrecision(newLeftVec, realList, newLeftVec.size(), true);
-                cout << "last precision: " << lastPrecision << endl;
-                cout << "create forward time: " << total_t1 / (double) CLOCKS_PER_SEC << endl;
-                cout << "random walk time: " << total_t2 / (double) CLOCKS_PER_SEC << endl;
-                cout << "constant time: " << total_t3 / (double) CLOCKS_PER_SEC << endl;
-                cout << "sort time: " << total_t4 / (double) CLOCKS_PER_SEC << endl;
-                cout << "bound time: " << (t4 - t3_1) / (double) CLOCKS_PER_SEC << endl;
-                cout << "useless time: " << (t5 - t4) / (double) CLOCKS_PER_SEC << endl;
-                cout << "back time: " << cost_time / (double) 1000 << endl;
+                // cout << "last precision: " << lastPrecision << endl;
+                // cout << "create forward time: " << total_t1 / (double) CLOCKS_PER_SEC << endl;
+                // cout << "random walk time: " << total_t2 / (double) CLOCKS_PER_SEC << endl;
+                // cout << "constant time: " << total_t3 / (double) CLOCKS_PER_SEC << endl;
+                // cout << "sort time: " << total_t4 / (double) CLOCKS_PER_SEC << endl;
+                // cout << "bound time: " << (t4 - t3_1) / (double) CLOCKS_PER_SEC << endl;
+                // cout << "useless time: " << (t5 - t4) / (double) CLOCKS_PER_SEC << endl;
+                // cout << "back time: " << cost_time / (double) 1000 << endl;
                 double totalTime = (total_t1 + total_t2 + total_t3 + total_t4 + t4 - t3_1) / (double) CLOCKS_PER_SEC + cost_time / (double) 1000; 
-                cout << "total time: " << totalTime << endl;
+                //cout << "total time: " << totalTime << endl;
                 avg_pre += lastPrecision;
                 avg_time += totalTime;
                 break;
@@ -672,7 +677,7 @@ public:
         delete[] betas;
         delete[] restR;
         delete[] forwardCandidate;
-        return resultList;
+        return topkppr;
     }
 
     // adaptive (backpush + walk)
@@ -720,7 +725,7 @@ public:
         //cout << "random walk time: " << (t1 - ta) / (double) CLOCKS_PER_SEC << endl;
         unordered_map<int, double> bounds;
         for(int i = 0; i < candidate_nodes.size(); i++){                
-            bounds[candidate_nodes[i]] = c * sqrt(3 * vars[candidate_nodes[i]] * log(candidate_nodes.size())) / (double) walk_num + r_threshold * alpha * c * 7 / (double)3 * r_sum0 * log(3 * candidate_nodes.size()) / (double) walk_num;
+            bounds[candidate_nodes[i]] = c * sqrt(3 * vars[candidate_nodes[i]] * log((int)candidate_nodes.size())) / (double) walk_num + r_threshold * alpha * c * 7 / (double)3 * r_sum0 * log(3 * (int)candidate_nodes.size()) / (double) walk_num;
         }
         typedef priority_queue<pair<int, double>, vector<pair<int,double> >, pqcompare> pq;
         pq upper_pq(pqcompare(true));
@@ -784,8 +789,8 @@ public:
             result.push_back(pair<int, double>(leftVec[i], answer_sim[leftVec[i]] + answer_sim2[leftVec[i]]));
         }
         
-        tempK = tempK - leftVec.size();
-        if(middleVec.size() - tempK <= error_num){
+        tempK = tempK - (int)leftVec.size();
+        if((int)middleVec.size() - tempK <= error_num){
             vector<pair<int, double> > targetCandidate;
             for(int i = 0; i < middleVec.size(); i++){
                 targetCandidate.push_back(pair<int, double>(middleVec[i], answer_sim[middleVec[i]] + answer_sim2[middleVec[i]]));
@@ -811,8 +816,8 @@ public:
 
         unordered_map<int, double> candidate_r_max;
     unordered_map<int, double> candidate_edge;
-        while(tempK > error_num && candidate_nodes.size() - tempK > error_num && r_threshold > 0.000001){
-            cout << "epoch: " << r_threshold << endl;
+        while(tempK > error_num && (int)candidate_nodes.size() - tempK > error_num && r_threshold > 0.000001){
+            //cout << "epoch: " << r_threshold << endl;
             clock_t t0 = clock();
             //vector<int> r_hash;
             int r_hash_avg_count = 0;
@@ -821,7 +826,7 @@ public:
                 r_hash_count = 0;
                 int t = candidate_nodes[ind];
                 candidate_r_max[t] = 0;
-        candidate_edge[t] = 0;
+                candidate_edge[t] = 0;
                 rmap_back[t] = 1;
                 r_item_arr[t] = true;
                 r_hash_arr[r_hash_count++] = t;
@@ -850,7 +855,7 @@ public:
                     rmap_back[tempNode] = 0;
                     answer_sim2[t] += r0_map[tempNode] * (alpha * tempR);                        
                     if(tempNode == s){
-            candidate_edge[t] += deadNodeList.size();
+                        candidate_edge[t] += deadNodeList.size();
                         for(int i = 0; i < deadNodeList.size(); i++){
                             int newNode = deadNodeList[i];
                             rmap_back[newNode] += (1-alpha) * tempR;
@@ -867,7 +872,7 @@ public:
                             }
                         }
                     }
-            candidate_edge[t] += g.getInSize(tempNode);    
+                    candidate_edge[t] += g.getInSize(tempNode);    
                     for(int i = 0; i < g.getInSize(tempNode); i++){
                         int newNode = g.getInVert(tempNode, i);
                         rmap_back[newNode] += (1-alpha) * tempR / (double) g.getOutSize(newNode);
@@ -899,7 +904,7 @@ public:
             time1 = (ta - t0) / (double) CLOCKS_PER_SEC;
             double tempWalk = (int) (400000 * time1);
             walk_num += tempWalk;
-            cout << "walk: " << walk_num << endl;
+           // cout << "walk: " << walk_num << endl;
             
             for(int i = 0; i < tempWalk; i++){                
                 int tempNode = alias.generateRandom(R);
@@ -938,7 +943,7 @@ public:
             unordered_map<int, double> bounds;
             for(int i = 0; i < candidate_nodes.size(); i++){  
                 //cout << "bound " << candidate_nodes[i] << ": " << candidate_edge[candidate_nodes[i]] << ", " << candidate_r_max[candidate_nodes[i]] << ", " << c * sqrt(3 * vars[candidate_nodes[i]] * log(candidate_nodes.size())) / (double) walk_num << ", " <<  0.1 * candidate_r_max[candidate_nodes[i]] * alpha * c * 7 / (double)3 * r_sum0 * log(3 * candidate_nodes.size()) / (double) walk_num << ", " << answer_sim[candidate_nodes[i]] + answer_sim2[candidate_nodes[i]] << endl;  
-                bounds[candidate_nodes[i]] = c * sqrt(3 * vars[candidate_nodes[i]] * log(candidate_nodes.size())) / (double) walk_num + 0.1 * candidate_r_max[candidate_nodes[i]] * alpha * c * 7 / (double)3 * r_sum0 * log(3 * candidate_nodes.size()) / (double) walk_num;
+                bounds[candidate_nodes[i]] = c * sqrt(3 * vars[candidate_nodes[i]] * log((int)candidate_nodes.size())) / (double) walk_num + 0.1 * candidate_r_max[candidate_nodes[i]] * alpha * c * 7 / (double)3 * r_sum0 * log(3 * (int)candidate_nodes.size()) / (double) walk_num;
             }
             typedef priority_queue<pair<int, double>, vector<pair<int,double> >, pqcompare> pq;
             pq upper_pq(pqcompare(true));
@@ -984,7 +989,7 @@ public:
             }
             double upperBound = upper_pq.top().second;
             double lowerBound = lower_pq.top().second;
-            cout << "upper and lower: " << upperBound << ", " << lowerBound << endl; 
+            //cout << "upper and lower: " << upperBound << ", " << lowerBound << endl; 
             vector<int> leftVec, middleVec, rightVec;
             for(int i = 0; i < candidate_nodes.size(); i++){
                 int tempNode = candidate_nodes[i];
@@ -1006,9 +1011,9 @@ public:
                 result.push_back(pair<int, double>(leftVec[i], answer_sim[leftVec[i]] + answer_sim2[leftVec[i]]));
             }
             
-            tempK = tempK - leftVec.size();
-            cout << "fileter to: " << middleVec.size() << " -> " << tempK << endl;
-            if(tempK < error_num || middleVec.size() - tempK < error_num || r_threshold < 0.000002){
+            tempK = tempK - (int)leftVec.size();
+            //cout << "fileter to: " << middleVec.size() << " -> " << tempK << endl;
+            if(tempK < error_num || (int)middleVec.size() - tempK < error_num || r_threshold < 0.000002){
                 vector<pair<int, double> > targetCandidate;
                 for(int i = 0; i < middleVec.size(); i++){
                     targetCandidate.push_back(pair<int, double>(middleVec[i], answer_sim[middleVec[i]] + answer_sim2[middleVec[i]]));
@@ -1028,7 +1033,7 @@ public:
             candidate_nodes = middleVec;
 
         }
-        cout << r_sum0 << ", " << walk_num << ", " << r_threshold * 2 << endl;
+        //cout << r_sum0 << ", " << walk_num << ", " << r_threshold * 2 << endl;
         return result;
     }
 
